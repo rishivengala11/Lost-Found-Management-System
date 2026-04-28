@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register - LostAndFound</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn {
+            cursor: pointer;
+            color: #0d6efd;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-card" id="loginCard">
+        <h2 class="text-center mb-4">Login</h2>
+        <div id="loginError" class="alert alert-danger d-none">Invalid email or password.</div>
+        <div id="unverifiedError" class="alert alert-warning d-none">
+            Your email is not verified. 
+            <form action="api/auth" method="POST" class="d-inline">
+                <input type="hidden" name="action" value="resend">
+                <input type="hidden" name="email" id="resendEmail">
+                <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-warning font-weight-bold">Resend Verification Link</button>
+            </form>
+        </div>
+        <div id="verificationSuccess" class="alert alert-success d-none">Email successfully verified! You can now log in.</div>
+        <div id="verificationResent" class="alert alert-info d-none">A new verification link has been sent to your email.</div>
+        <div id="regSuccess" class="alert alert-success d-none">Registration successful! Please check your email to verify your account.</div>
+        <div id="invalidToken" class="alert alert-danger d-none">Invalid or expired verification link.</div>
+        <form action="api/auth" method="POST">
+            <input type="hidden" name="action" value="login">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div class="text-center mt-3">
+            <span class="text-muted">Don't have an account? </span>
+            <span class="toggle-btn" onclick="toggleForms()">Register here</span>
+        </div>
+        <div class="text-center mt-3">
+            <a href="index.html" class="text-decoration-none">&larr; Back to Home</a>
+        </div>
+    </div>
+
+    <div class="auth-card d-none" id="registerCard">
+        <h2 class="text-center mb-4">Register</h2>
+        <div id="registerError" class="alert alert-danger d-none">Registration failed. Email may already exist.</div>
+        <form action="api/auth" method="POST">
+            <input type="hidden" name="action" value="register">
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="fullName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Create Account</button>
+        </form>
+        <div class="text-center mt-3">
+            <span class="text-muted">Already have an account? </span>
+            <span class="toggle-btn" onclick="toggleForms()">Login here</span>
+        </div>
+        <div class="text-center mt-3">
+            <a href="index.html" class="text-decoration-none">&larr; Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleForms() {
+            document.getElementById('loginCard').classList.toggle('d-none');
+            document.getElementById('registerCard').classList.toggle('d-none');
+        }
+
+        if (window.location.search.includes('error=1')) {
+            document.getElementById('loginError').classList.remove('d-none');
+        } else if (window.location.search.includes('reg_error=1')) {
+            toggleForms();
+            document.getElementById('registerError').classList.remove('d-none');
+        } else if (window.location.search.includes('error=unverified')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            document.getElementById('resendEmail').value = urlParams.get('email');
+            document.getElementById('unverifiedError').classList.remove('d-none');
+        } else if (window.location.search.includes('success=verified')) {
+            document.getElementById('verificationSuccess').classList.remove('d-none');
+        } else if (window.location.search.includes('success=registered')) {
+            document.getElementById('regSuccess').classList.remove('d-none');
+        } else if (window.location.search.includes('success=resent')) {
+            document.getElementById('verificationResent').classList.remove('d-none');
+        } else if (window.location.search.includes('error=invalid_token')) {
+            document.getElementById('invalidToken').classList.remove('d-none');
+        }
+    </script>
+    <script src="js/app.js?v=2"></script>
+</body>
+
+</html>

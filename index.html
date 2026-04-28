@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found Management System - Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body onload="loadDashboard()">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-box-open mr-2"></i>Lost & Found</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active"><a class="nav-link" href="index.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="report-lost.html">Report Lost</a></li>
+                    <li class="nav-item"><a class="nav-link" href="report-found.html">Report Found</a></li>
+                    <li class="nav-item"><a class="nav-link" href="search.html">Search Items</a></li>
+                    <li class="nav-item"><a class="nav-link" href="matches.html">Matches</a></li>
+                </ul>
+                <ul class="navbar-nav" id="authNav"></ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="hero-title display-4">Lost Something? Found Something?</h1>
+            <p class="lead mb-4">The easiest way to report and reclaim lost belongings on campus.</p>
+            <div class="d-flex justify-content-center">
+                <a href="report-lost.html" class="btn btn-light btn-lg mr-3 shadow text-primary font-weight-bold">I Lost an Item</a>
+                <a href="report-found.html" class="btn btn-outline-light btn-lg shadow font-weight-bold">I Found an Item</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="container">
+        
+        <!-- Stats Row -->
+        <div class="row mb-5">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Items Lost</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalLost">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-search-minus fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Items Found</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalFound">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-search-plus fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Items Claimed</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalClaimed">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-hand-holding-heart fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Items Returned</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalReturned">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Items Row -->
+        <div class="row">
+            <!-- Recent Lost Items -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Recently Reported Lost</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush" id="recentLostList">
+                            <!-- Items inserted by JS -->
+                            <li class="list-group-item text-center"><div class="spinner-border text-primary" role="status"></div></li>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="search.html?type=lost" class="btn btn-sm btn-link">View All Lost Items</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Found Items -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">Recently Reported Found</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush" id="recentFoundList">
+                            <!-- Items inserted by JS -->
+                            <li class="list-group-item text-center"><div class="spinner-border text-success" role="status"></div></li>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="search.html?type=found" class="btn btn-sm btn-link text-success">View All Found Items</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 GOKARAJU RANGARAJU INSTITUTE OF ENGINEERING AND TECHNOLOGY. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js?v=4"></script>
+</body>
+</html>

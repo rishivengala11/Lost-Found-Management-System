@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Found Item - Lost & Found</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-box-open mr-2"></i>Lost & Found</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="report-lost.html">Report Lost</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="report-found.html">Report Found</a></li>
+                    <li class="nav-item"><a class="nav-link" href="search.html">Search Items</a></li>
+                    <li class="nav-item"><a class="nav-link" href="matches.html">Matches</a></li>
+                </ul>
+                <ul class="navbar-nav" id="authNav"></ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow mb-4 fade-in">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="m-0 font-weight-bold"><i class="fas fa-search-plus mr-2"></i>Report Found Item</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertArea"></div>
+                        <form onsubmit="submitReport(event, 'found')">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Item Name *</label>
+                                    <input type="text" class="form-control" name="itemName" placeholder="e.g. Wallet"
+                                        required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Category *</label>
+                                    <select class="form-control" name="category" required>
+                                        <option value="">Select Category...</option>
+                                        <option value="Electronics">Electronics</option>
+                                        <option value="Documents">Documents</option>
+                                        <option value="Bags">Bags</option>
+                                        <option value="Keys">Keys</option>
+                                        <option value="Clothing">Clothing</option>
+                                        <option value="Accessories">Accessories</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" rows="3"
+                                    placeholder="Describe the item..."></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Date Found *</label>
+                                    <input type="date" class="form-control" name="dateFound" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Location *</label>
+                                    <input type="text" class="form-control" name="location" placeholder="e.g. Cafeteria"
+                                        required>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h6 class="text-muted mb-3">Your Contact Details (Finder)</h6>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Your Name *</label>
+                                    <input type="text" class="form-control" name="finderName" placeholder="Full Name"
+                                        required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="form-label">Contact (Phone/Email) *</label>
+                                    <input type="text" class="form-control" name="contact" placeholder="Phone or Email"
+                                        required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-block btn-lg mt-3">Submit Report</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js?v=2"></script>
+</body>
+
+</html>
