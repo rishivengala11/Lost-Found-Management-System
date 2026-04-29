@@ -11,5 +11,6 @@ javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lost
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\LostItemDAO.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\FoundItemDAO.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\servlet\*.java
+javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\UserDAO.java
 echo Compilation complete.
 pause
