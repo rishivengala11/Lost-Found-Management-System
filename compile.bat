@@ -8,9 +8,9 @@ if not exist "WEB-INF\classes" mkdir "WEB-INF\classes"
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\util\DBConnection.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\model\LostItem.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\model\FoundItem.java
+javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\UserDAO.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\LostItemDAO.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\FoundItemDAO.java
 javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\servlet\*.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\UserDAO.java
 echo Compilation complete.
 pause
