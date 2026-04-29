@@ -42,9 +42,22 @@ public class AdminServlet extends HttpServlet {
                     LostItem item = lostItemDAO.getById(id);
                     if (item != null) {
                         List<String> emails = userDAO.getAllVerifiedUserEmails();
-                        new Thread(() -> {
-                            com.lostandfound.util.EmailUtil.sendItemNotificationEmail(emails, "lost", item.getItemName(), item.getCategory(), item.getLocation(), item.getDateLost());
-                        }).start();
+
+System.out.println("ADMIN APPROVED ITEM - SENDING EMAIL");
+System.out.println("EMAIL LIST: " + emails);
+
+// For demo: force send to your email
+emails.clear();
+emails.add("vengalarishi143@gmail.com");
+
+EmailUtil.sendItemNotificationEmail(
+    emails,
+    "lost",
+    item.getItemName(),
+    item.getCategory(),
+    item.getLocation(),
+    item.getDateLost()
+);
                     }
                 }
             } else if ("found".equals(type)) {
@@ -53,9 +66,22 @@ public class AdminServlet extends HttpServlet {
                     FoundItem item = foundItemDAO.getById(id);
                     if (item != null) {
                         List<String> emails = userDAO.getAllVerifiedUserEmails();
-                        new Thread(() -> {
-                            com.lostandfound.util.EmailUtil.sendItemNotificationEmail(emails, "found", item.getItemName(), item.getCategory(), item.getLocation(), item.getDateFound());
-                        }).start();
+
+System.out.println("ADMIN APPROVED ITEM - SENDING EMAIL");
+System.out.println("EMAIL LIST: " + emails);
+
+// For demo: force send to your email
+emails.clear();
+emails.add("vengalarishi143@gmail.com");
+
+EmailUtil.sendItemNotificationEmail(
+    emails,
+    "found",
+    item.getItemName(),
+    item.getCategory(),
+    item.getLocation(),
+    item.getDateLost()
+);
                     }
                 }
             }
