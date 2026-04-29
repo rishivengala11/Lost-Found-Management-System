@@ -8,7 +8,8 @@ public class UserDAO {
 
     public User authenticate(String email, String password) {
         String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
-
+        System.out.println("LOGIN EMAIL: [" + email + "]");
+        System.out.println("LOGIN PASSWORD: [" + password + "]");
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -17,6 +18,7 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                System.out.println("LOGIN SUCCESS: user found");
                 User user = new User();
                 user.setId(rs.getInt("id"));
                 user.setEmail(rs.getString("email"));
@@ -29,6 +31,7 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        System.out.println("LOGIN FAILED: no matching user");
         return null;
     }
 
