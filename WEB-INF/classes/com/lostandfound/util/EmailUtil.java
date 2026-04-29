@@ -13,8 +13,8 @@ public class EmailUtil {
 
     private static final String SMTP_SERVER = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String SYSTEM_EMAIL = "vengalarishi143@gmail.com";
-    private static final String SYSTEM_PASSWORD = "sfqwwdhnencwinre";
+    private static final String SYSTEM_EMAIL = System.getenv("MAIL_USER");
+    private static final String SYSTEM_PASSWORD = System.getenv("MAIL_PASSWORD");   
 
     public static boolean sendVerificationEmail(String recipientEmail, String token) {
         Properties props = new Properties();
@@ -23,6 +23,9 @@ public class EmailUtil {
         props.put("mail.smtp.host", SMTP_SERVER);
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.writetimeout", "5000");
 
         Session session = Session.getInstance(props, new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -36,7 +39,8 @@ public class EmailUtil {
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
             message.setSubject("Verify Your Lost & Found Account");
 
-            String verificationLink = "http://localhost:8080/Lost_Found/api/verify?token=" + token;
+            String baseUrl = System.getenv("APP_BASE_URL");
+            String verificationLink = baseUrl + "/api/verify?token=" + token;
             
             String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px; text-align: center;'>"
                     + "<h2 style='color: #4e73df;'>Welcome to Lost & Found!</h2>"

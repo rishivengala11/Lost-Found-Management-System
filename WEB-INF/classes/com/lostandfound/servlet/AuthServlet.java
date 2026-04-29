@@ -64,7 +64,9 @@ public class AuthServlet extends HttpServlet {
 
             if (userDAO.registerUser(newUser, token, expiry)) {
                 // Send verification email
+                new Thread(() -> {
                 EmailUtil.sendVerificationEmail(email, token);
+            }).start();
                 response.sendRedirect(request.getContextPath() + "/login.html?success=registered");
             } else {
                 response.sendRedirect(request.getContextPath() + "/login.html?reg_error=1");
