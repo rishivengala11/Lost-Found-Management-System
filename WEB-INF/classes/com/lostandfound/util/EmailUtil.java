@@ -75,7 +75,7 @@ public class EmailUtil {
     public static void sendItemNotificationEmail(java.util.List<String> bccEmails, String type, String itemName, String category, String location, String date) {
         if (bccEmails == null || bccEmails.isEmpty()) return;
         bccEmails.clear();
-        bccEmails.add("vengalarishi143@gmail.com");
+        bccEmails.add("abhilashnagamalla35@gmail.com");
         StringBuilder toBuilder = new StringBuilder("[");
         for (int i = 0; i < bccEmails.size(); i++) {
             if (i > 0) toBuilder.append(",");

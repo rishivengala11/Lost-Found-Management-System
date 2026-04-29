@@ -48,7 +48,7 @@ System.out.println("EMAIL LIST: " + emails);
 
 // For demo: force send to your email
 emails.clear();
-emails.add("vengalarishi143@gmail.com");
+emails.add("abhilashnagamalla35@gmail.com");
 
 EmailUtil.sendItemNotificationEmail(
     emails,
@@ -72,7 +72,7 @@ System.out.println("EMAIL LIST: " + emails);
 
 // For demo: force send to your email
 emails.clear();
-emails.add("vengalarishi143@gmail.com");
+emails.add("abhilashnagamalla35@gmail.com");
 
 EmailUtil.sendItemNotificationEmail(
     emails,
