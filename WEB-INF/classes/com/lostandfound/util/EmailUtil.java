@@ -1,128 +1,101 @@
 package com.lostandfound.util;
 
-import java.util.Properties;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class EmailUtil {
 
-    private static final String SMTP_SERVER = "smtp.gmail.com";
-    private static final String SMTP_PORT = "587";
-
-    private static final String SYSTEM_EMAIL = System.getenv("MAIL_USER");
-    private static final String SYSTEM_PASSWORD = System.getenv("MAIL_PASSWORD");
+    private static final String RESEND_API_KEY = System.getenv("RESEND_API_KEY");
     private static final String APP_BASE_URL = System.getenv("APP_BASE_URL");
+    private static final String FROM_EMAIL = System.getenv("FROM_EMAIL");
 
-    private static Properties getMailProperties() {
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", SMTP_SERVER);
-        props.put("mail.smtp.port", SMTP_PORT);
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-        props.put("mail.smtp.connectiontimeout", "5000");
-        props.put("mail.smtp.timeout", "5000");
-        props.put("mail.smtp.writetimeout", "5000");
-
-        return props;
+    private static String escapeJson(String text) {
+        if (text == null) return "";
+        return text.replace("\\", "\\\\")
+                   .replace("\"", "\\\"")
+                   .replace("\n", "\\n")
+                   .replace("\r", "\\r");
     }
 
-    private static Session getMailSession() {
-        return Session.getInstance(getMailProperties(), new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(SYSTEM_EMAIL, SYSTEM_PASSWORD);
-            }
-        });
-    }
-
-    public static boolean sendVerificationEmail(String recipientEmail, String token) {
+    private static boolean sendEmail(String toJsonArray, String subject, String html) {
         try {
-            if (SYSTEM_EMAIL == null || SYSTEM_PASSWORD == null || APP_BASE_URL == null) {
-                System.out.println("EMAIL FAILED: Missing MAIL_USER / MAIL_PASSWORD / APP_BASE_URL env variable");
+            if (RESEND_API_KEY == null || FROM_EMAIL == null) {
+                System.out.println("RESEND FAILED: Missing RESEND_API_KEY or FROM_EMAIL");
                 return false;
             }
 
-            Session session = getMailSession();
+            URL url = new URL("https://api.resend.com/emails");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SYSTEM_EMAIL));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-            message.setSubject("Verify Your Lost & Found Account");
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            conn.setRequestProperty("Authorization", "Bearer " + RESEND_API_KEY);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
 
-            String verificationLink = APP_BASE_URL + "/api/verify?token=" + token;
+            String json = "{"
+                    + "\"from\":\"" + escapeJson(FROM_EMAIL) + "\","
+                    + "\"to\":" + toJsonArray + ","
+                    + "\"subject\":\"" + escapeJson(subject) + "\","
+                    + "\"html\":\"" + escapeJson(html) + "\""
+                    + "}";
 
-            String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px; text-align: center;'>"
-                    + "<h2 style='color: #4e73df;'>Welcome to Lost & Found!</h2>"
-                    + "<p>Please verify your email address to activate your account.</p>"
-                    + "<a href='" + verificationLink + "' style='display: inline-block; padding: 10px 20px; background-color: #4e73df; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;'>Verify Email Address</a>"
-                    + "<p style='margin-top: 30px; font-size: 12px; color: #888;'>If you did not create this account, you can ignore this email.</p>"
-                    + "</div>";
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(json.getBytes(StandardCharsets.UTF_8));
+            }
 
-            message.setContent(htmlContent, "text/html; charset=utf-8");
+            int status = conn.getResponseCode();
+            System.out.println("RESEND STATUS: " + status);
 
-            System.out.println("SENDING VERIFICATION EMAIL TO: " + recipientEmail);
-            Transport.send(message);
-            System.out.println("VERIFICATION EMAIL SENT SUCCESSFULLY TO: " + recipientEmail);
+            return status >= 200 && status < 300;
 
-            return true;
-
-        } catch (MessagingException e) {
-            System.out.println("EMAIL FAILED: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("RESEND FAILED: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
+    public static boolean sendVerificationEmail(String recipientEmail, String token) {
+        String verificationLink = APP_BASE_URL + "/api/verify?token=" + token;
+
+        String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px; text-align: center;'>"
+                + "<h2 style='color: #4e73df;'>Welcome to Lost & Found!</h2>"
+                + "<p>Please verify your email address to activate your account.</p>"
+                + "<a href='" + verificationLink + "' style='display:inline-block;padding:10px 20px;background:#4e73df;color:white;text-decoration:none;border-radius:5px;'>Verify Email</a>"
+                + "</div>";
+
+        String to = "[\"" + escapeJson(recipientEmail) + "\"]";
+        return sendEmail(to, "Verify Your Lost & Found Account", htmlContent);
+    }
+
     public static void sendItemNotificationEmail(java.util.List<String> bccEmails, String type, String itemName, String category, String location, String date) {
-        if (bccEmails == null || bccEmails.isEmpty()) {
-            System.out.println("EMAIL SKIPPED: No recipients");
-            return;
+        if (bccEmails == null || bccEmails.isEmpty()) return;
+
+        StringBuilder toBuilder = new StringBuilder("[");
+        for (int i = 0; i < bccEmails.size(); i++) {
+            if (i > 0) toBuilder.append(",");
+            toBuilder.append("\"").append(escapeJson(bccEmails.get(i))).append("\"");
         }
+        toBuilder.append("]");
 
-        try {
-            if (SYSTEM_EMAIL == null || SYSTEM_PASSWORD == null) {
-                System.out.println("EMAIL FAILED: Missing MAIL_USER / MAIL_PASSWORD env variable");
-                return;
-            }
+        String typeCapitalized = type.substring(0, 1).toUpperCase() + type.substring(1);
 
-            Session session = getMailSession();
+        String htmlContent = "<div style='font-family: Arial, sans-serif; padding:20px;'>"
+                + "<h2 style='color:#4e73df;'>New " + typeCapitalized + " Item Approved</h2>"
+                + "<p>A new item has been approved by the admin.</p>"
+                + "<ul>"
+                + "<li><strong>Item Name:</strong> " + itemName + "</li>"
+                + "<li><strong>Category:</strong> " + category + "</li>"
+                + "<li><strong>Location:</strong> " + location + "</li>"
+                + "<li><strong>Date:</strong> " + date + "</li>"
+                + "</ul>"
+                + "<p>Please log in to the Lost & Found portal for more details.</p>"
+                + "</div>";
 
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SYSTEM_EMAIL));
-
-            String bccAddresses = String.join(",", bccEmails);
-            message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(bccAddresses));
-
-            String typeCapitalized = type.substring(0, 1).toUpperCase() + type.substring(1);
-            message.setSubject("New " + typeCapitalized + " Item: " + itemName);
-
-            String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                    + "<h2 style='color: #4e73df;'>New " + typeCapitalized + " Item Approved</h2>"
-                    + "<p>A new item has been approved by the admin.</p>"
-                    + "<ul style='list-style-type: none; padding-left: 0;'>"
-                    + "<li><strong>Item Name:</strong> " + itemName + "</li>"
-                    + "<li><strong>Category:</strong> " + category + "</li>"
-                    + "<li><strong>Location:</strong> " + location + "</li>"
-                    + "<li><strong>Date:</strong> " + date + "</li>"
-                    + "</ul>"
-                    + "<p>Please log in to the Lost & Found portal for more details.</p>"
-                    + "</div>";
-
-            message.setContent(htmlContent, "text/html; charset=utf-8");
-
-            System.out.println("SENDING ITEM NOTIFICATION EMAIL TO: " + bccAddresses);
-            Transport.send(message);
-            System.out.println("ITEM NOTIFICATION EMAIL SENT SUCCESSFULLY");
-
-        } catch (MessagingException e) {
-            System.out.println("EMAIL FAILED: " + e.getMessage());
-            e.printStackTrace();
-        }
+        sendEmail(toBuilder.toString(), "New " + typeCapitalized + " Item: " + itemName, htmlContent);
     }
 }
