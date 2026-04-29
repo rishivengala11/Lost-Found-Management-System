@@ -63,12 +63,14 @@ public class AuthServlet extends HttpServlet {
             Timestamp expiry = new Timestamp(System.currentTimeMillis() + (15 * 60 * 1000)); // 15 mins
 
             if (userDAO.registerUser(newUser, token, expiry)) {
-                // Send verification email
-                new Thread(() -> {
-                EmailUtil.sendVerificationEmail(email, token);
-            }).start();
-                response.sendRedirect(request.getContextPath() + "/login.html?success=registered");
-            } else {
+    System.out.println("CALLING VERIFICATION EMAIL FOR: " + email);
+
+    boolean sent = EmailUtil.sendVerificationEmail(email, token);
+
+    System.out.println("VERIFICATION EMAIL RESULT: " + sent);
+
+    response.sendRedirect(request.getContextPath() + "/login.html?success=registered");
+} else {
                 response.sendRedirect(request.getContextPath() + "/login.html?reg_error=1");
             }
         } else if ("resend".equals(action)) {
