@@ -1,17 +1,29 @@
 @echo off
-echo Compiling Java files...
+echo Cleaning old .class files...
 
-set CLASSPATH="C:\xampp\tomcat\lib\servlet-api.jar";"WEB-INF\classes";"WEB-INF\lib\javax.mail.jar";"WEB-INF\lib\activation.jar";.
+del /s /q WEB-INF\classes\*.class
 
-if not exist "WEB-INF\classes" mkdir "WEB-INF\classes"
+set CLASSPATH=C:\xampp\tomcat\lib\servlet-api.jar;WEB-INF\lib\*;.
 
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\util\DBConnection.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\model\User.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\model\LostItem.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\model\FoundItem.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\UserDAO.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\LostItemDAO.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\dao\FoundItemDAO.java
-javac --release 17 -d "WEB-INF\classes" -cp %CLASSPATH% WEB-INF\classes\com\lostandfound\servlet\*.java
+echo Compiling MODEL classes...
+for /r WEB-INF\classes\com\lostandfound\model %%f in (*.java) do (
+    javac --release 17 -cp "%CLASSPATH%" -d WEB-INF\classes "%%f"
+)
+
+echo Compiling UTIL classes...
+for /r WEB-INF\classes\com\lostandfound\util %%f in (*.java) do (
+    javac --release 17 -cp "%CLASSPATH%;WEB-INF\classes" -d WEB-INF\classes "%%f"
+)
+
+echo Compiling DAO classes...
+for /r WEB-INF\classes\com\lostandfound\dao %%f in (*.java) do (
+    javac --release 17 -cp "%CLASSPATH%;WEB-INF\classes" -d WEB-INF\classes "%%f"
+)
+
+echo Compiling SERVLET classes...
+for /r WEB-INF\classes\com\lostandfound\servlet %%f in (*.java) do (
+    javac --release 17 -cp "%CLASSPATH%;WEB-INF\classes" -d WEB-INF\classes "%%f"
+)
+
 echo Compilation complete.
 pause
