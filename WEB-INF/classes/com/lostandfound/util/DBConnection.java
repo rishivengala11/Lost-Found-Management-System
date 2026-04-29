@@ -14,9 +14,9 @@ import java.sql.SQLException;
 public class DBConnection {
 
     // Database configuration
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/lost_found_db";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = ""; // XAMPP default: root with no password
+    private static final String DB_URL = System.getenv("DB_URL");
+    private static final String DB_USER = System.getenv("DB_USER");
+    private static final String DB_PASSWORD = System.getenv("DB_PASSWORD"); // railway online db connection
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
 
     static {
