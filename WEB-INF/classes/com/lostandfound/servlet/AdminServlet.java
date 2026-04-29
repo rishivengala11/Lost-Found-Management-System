@@ -1,5 +1,5 @@
 package com.lostandfound.servlet;
-
+import com.lostandfound.util.EmailUtil;
 import com.lostandfound.dao.UserDAO;
 import com.lostandfound.dao.LostItemDAO;
 import com.lostandfound.dao.FoundItemDAO;
@@ -80,7 +80,7 @@ EmailUtil.sendItemNotificationEmail(
     item.getItemName(),
     item.getCategory(),
     item.getLocation(),
-    item.getDateLost()
+    item.getDateFound()
 );
                     }
                 }
