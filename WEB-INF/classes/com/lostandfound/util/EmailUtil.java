@@ -1,129 +1,127 @@
 package com.lostandfound.util;
 
-import java.util.Properties;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class EmailUtil {
 
-    private static final String SMTP_SERVER = "smtp-relay.brevo.com";
-    private static final String SMTP_PORT = "587";
-
-    private static final String SYSTEM_EMAIL = System.getenv("MAIL_USER");
-    private static final String SYSTEM_PASSWORD = System.getenv("MAIL_PASSWORD");
+    private static final String BREVO_API_KEY = System.getenv("BREVO_API_KEY");
     private static final String APP_BASE_URL = System.getenv("APP_BASE_URL");
 
-    private static Properties getMailProperties() {
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", SMTP_SERVER);
-        props.put("mail.smtp.port", SMTP_PORT);
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+    // Must be verified in Brevo Senders
+    private static final String SENDER_EMAIL = "vengalarishi143@gmail.com";
+    private static final String SENDER_NAME = "Lost & Found";
 
-        props.put("mail.smtp.connectiontimeout", "10000");
-        props.put("mail.smtp.timeout", "10000");
-        props.put("mail.smtp.writetimeout", "10000");
-
-        return props;
+    private static String escapeJson(String text) {
+        if (text == null) return "";
+        return text.replace("\\", "\\\\")
+                   .replace("\"", "\\\"")
+                   .replace("\n", "\\n")
+                   .replace("\r", "\\r");
     }
 
-    private static Session getMailSession() {
-        return Session.getInstance(getMailProperties(), new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(SYSTEM_EMAIL, SYSTEM_PASSWORD);
-            }
-        });
-    }
-
-    public static boolean sendVerificationEmail(String recipientEmail, String token) {
-        System.out.println("BREVO METHOD CALLED");
-        System.out.println("MAIL_USER = " + SYSTEM_EMAIL);
+    private static boolean sendEmail(String recipientEmail, String subject, String htmlContent) {
         try {
-            if (SYSTEM_EMAIL == null || SYSTEM_PASSWORD == null || APP_BASE_URL == null) {
-                System.out.println("BREVO FAILED: Missing MAIL_USER / MAIL_PASSWORD / APP_BASE_URL");
-                return false;
+
+            System.out.println("BREVO API METHOD CALLED");
+            System.out.println("SENDING TO: " + recipientEmail);
+
+            URL url = new URL("https://api.brevo.com/v3/smtp/email");
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("accept", "application/json");
+            conn.setRequestProperty("api-key", BREVO_API_KEY);
+            conn.setRequestProperty("content-type", "application/json");
+
+            conn.setDoOutput(true);
+
+            String jsonInputString =
+                    "{"
+                    + "\"sender\":{"
+                    + "\"name\":\"" + escapeJson(SENDER_NAME) + "\","
+                    + "\"email\":\"" + escapeJson(SENDER_EMAIL) + "\""
+                    + "},"
+                    + "\"to\":[{"
+                    + "\"email\":\"" + escapeJson(recipientEmail) + "\""
+                    + "}],"
+                    + "\"subject\":\"" + escapeJson(subject) + "\","
+                    + "\"htmlContent\":\"" + escapeJson(htmlContent) + "\""
+                    + "}";
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
             }
 
-            Session session = getMailSession();
+            int responseCode = conn.getResponseCode();
 
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SYSTEM_EMAIL));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-            message.setSubject("Verify Your Lost & Found Account");
+            System.out.println("BREVO RESPONSE CODE: " + responseCode);
 
-            String verificationLink = APP_BASE_URL + "/api/verify?token=" + token;
+            return responseCode >= 200 && responseCode < 300;
 
-            String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px; text-align: center;'>"
-                    + "<h2 style='color: #4e73df;'>Welcome to Lost & Found!</h2>"
-                    + "<p>Please verify your email address to activate your account.</p>"
-                    + "<a href='" + verificationLink + "' style='display:inline-block;padding:10px 20px;background:#4e73df;color:white;text-decoration:none;border-radius:5px;'>Verify Email</a>"
-                    + "</div>";
-
-            message.setContent(htmlContent, "text/html; charset=utf-8");
-
-            System.out.println("SENDING VERIFICATION EMAIL TO: " + recipientEmail);
-            Transport.send(message);
-            System.out.println("VERIFICATION EMAIL SENT SUCCESSFULLY TO: " + recipientEmail);
-
-            return true;
-
-        } catch (MessagingException e) {
-            System.out.println("BREVO FAILED: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("BREVO API FAILED: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
-    public static void sendItemNotificationEmail(java.util.List<String> emails, String type, String itemName, String category, String location, String date) {
-        if (emails == null || emails.isEmpty()) {
-            System.out.println("BREVO SKIPPED: No verified users to notify");
-            return;
-        }
+    public static boolean sendVerificationEmail(String recipientEmail, String token) {
 
-        try {
-            if (SYSTEM_EMAIL == null || SYSTEM_PASSWORD == null) {
-                System.out.println("BREVO FAILED: Missing MAIL_USER / MAIL_PASSWORD");
-                return;
-            }
+        String verificationLink =
+                APP_BASE_URL + "/api/verify?token=" + token;
 
-            Session session = getMailSession();
+        String htmlContent =
+                "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
+                + "<h2>Welcome to Lost & Found</h2>"
+                + "<p>Please verify your email.</p>"
+                + "<a href='" + verificationLink + "' "
+                + "style='padding:10px 20px;background:#4e73df;color:white;text-decoration:none;border-radius:5px;'>"
+                + "Verify Email"
+                + "</a>"
+                + "</div>";
 
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SYSTEM_EMAIL));
+        return sendEmail(
+                recipientEmail,
+                "Verify Your Lost & Found Account",
+                htmlContent
+        );
+    }
 
-            String recipients = String.join(",", emails);
-            message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(recipients));
+    public static void sendItemNotificationEmail(
+            java.util.List<String> emails,
+            String type,
+            String itemName,
+            String category,
+            String location,
+            String date) {
 
-            String typeCapitalized = type.substring(0, 1).toUpperCase() + type.substring(1);
-            message.setSubject("New " + typeCapitalized + " Item: " + itemName);
+        if (emails == null || emails.isEmpty()) return;
 
-            String htmlContent = "<div style='font-family: Arial, sans-serif; padding:20px;'>"
-                    + "<h2 style='color:#4e73df;'>New " + typeCapitalized + " Item Approved</h2>"
-                    + "<p>A new item has been approved by the admin.</p>"
-                    + "<ul>"
-                    + "<li><strong>Item Name:</strong> " + itemName + "</li>"
-                    + "<li><strong>Category:</strong> " + category + "</li>"
-                    + "<li><strong>Location:</strong> " + location + "</li>"
-                    + "<li><strong>Date:</strong> " + date + "</li>"
-                    + "</ul>"
-                    + "<p>Please log in to the Lost & Found portal for more details.</p>"
-                    + "</div>";
+        String typeCapitalized =
+                type.substring(0, 1).toUpperCase() + type.substring(1);
 
-            message.setContent(htmlContent, "text/html; charset=utf-8");
+        String htmlContent =
+                "<div style='font-family: Arial, sans-serif; padding:20px;'>"
+                + "<h2>New " + typeCapitalized + " Item Approved</h2>"
+                + "<ul>"
+                + "<li><strong>Item:</strong> " + itemName + "</li>"
+                + "<li><strong>Category:</strong> " + category + "</li>"
+                + "<li><strong>Location:</strong> " + location + "</li>"
+                + "<li><strong>Date:</strong> " + date + "</li>"
+                + "</ul>"
+                + "</div>";
 
-            System.out.println("SENDING ITEM NOTIFICATION EMAIL TO: " + recipients);
-            Transport.send(message);
-            System.out.println("ITEM NOTIFICATION EMAIL SENT SUCCESSFULLY");
-
-        } catch (MessagingException e) {
-            System.out.println("BREVO FAILED: " + e.getMessage());
-            e.printStackTrace();
+        for (String email : emails) {
+            sendEmail(
+                    email,
+                    "New " + typeCapitalized + " Item Approved",
+                    htmlContent
+            );
         }
     }
 }
