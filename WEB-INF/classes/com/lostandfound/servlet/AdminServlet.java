@@ -47,8 +47,8 @@ System.out.println("ADMIN APPROVED ITEM - SENDING EMAIL");
 System.out.println("EMAIL LIST: " + emails);
 
 // For demo: force send to your email
-emails.clear();
-emails.add("abhilashnagamalla35@gmail.com");
+// emails.clear();
+// emails.add("abhilashnagamalla35@gmail.com");
 
 EmailUtil.sendItemNotificationEmail(
     emails,
@@ -71,8 +71,8 @@ System.out.println("ADMIN APPROVED ITEM - SENDING EMAIL");
 System.out.println("EMAIL LIST: " + emails);
 
 // For demo: force send to your email
-emails.clear();
-emails.add("abhilashnagamalla35@gmail.com");
+// emails.clear();
+// emails.add("abhilashnagamalla35@gmail.com");
 
 EmailUtil.sendItemNotificationEmail(
     emails,
