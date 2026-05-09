@@ -42,6 +42,8 @@ public class EmailUtil {
     }
 
     public static boolean sendVerificationEmail(String recipientEmail, String token) {
+        System.out.println("BREVO METHOD CALLED");
+        System.out.println("MAIL_USER = " + SYSTEM_EMAIL);
         try {
             if (SYSTEM_EMAIL == null || SYSTEM_PASSWORD == null || APP_BASE_URL == null) {
                 System.out.println("BREVO FAILED: Missing MAIL_USER / MAIL_PASSWORD / APP_BASE_URL");
